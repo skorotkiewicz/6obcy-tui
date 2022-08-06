@@ -148,10 +148,18 @@ const _handleSocketMessage = (data) => {
     case "rtopic":
       _handleRandomQuestion(msgData);
       break;
+
+    case "count":
+      _handleCount(msgData.ev_data);
+      break;
   }
 };
 
-//
+const _handleCount = (count) => {
+  countBox.setContent(count + " osób online");
+  screen.render();
+};
+
 const _handleRandomQuestion = (msgData) => {
   messageList.addItem(colors.end(msgData.ev_data.topic));
   messageList.scrollTo(100);
@@ -362,7 +370,15 @@ const messageList = blessed.list({
 var box = blessed.box({
   top: "85%",
   left: 0,
-  width: "100%",
+  width: "80%",
+  height: "5%",
+  content: "",
+});
+
+var countBox = blessed.box({
+  top: "85%",
+  right: 0,
+  width: "20%",
   height: "5%",
   content: "",
 });
@@ -411,6 +427,7 @@ screen.key(["escape", "C-c"], function () {
 
 screen.append(messageList);
 screen.append(box);
+screen.append(countBox);
 screen.append(input);
 
 input.focus();
