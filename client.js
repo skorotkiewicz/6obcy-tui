@@ -246,10 +246,6 @@ const onConnected = () => {
   messageList.addItem(`connected`);
   messageList.setScrollPerc(100);
   screen.render();
-
-  ws.send(
-    '4{"ev_name":"_cinfo","ev_data":{"cvdate":"2017-08-01","mobile":false,"cver":"v2.5","adf":"ajaxPHP","testdata":{"ckey":0,"recevsent":false}}}'
-  );
 };
 
 const parseJson = (str) => {
