@@ -31,6 +31,11 @@ $ yarn start
 $ npm run start
 ```
 
+Available commands:
+
+- /dis - disconnects and looks for a new user
+- /topic - sends a random topic to confersation
+
 ## Configuration
 
 Client is able to solve captcha by itself thanks to 2captcha.com service, to enable auto captcha solving change `dotenv` file name to `.env` and enter your API key, restarting client will automatically solve every captcha.
