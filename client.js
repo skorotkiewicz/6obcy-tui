@@ -13,6 +13,8 @@ let captchaID = "";
 let captchaBase64 = "";
 let reconnect = true;
 let CAPI;
+let typingState = false;
+let typingTimeout = null;
 
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
@@ -85,7 +87,8 @@ const sendMessage = (msg) => {
   messageList.setScrollPerc(100);
   screen.render();
 
-  Typing("false");
+  Typing(false);
+  screen.render();
 };
 
 const startConversation = () => {
@@ -206,8 +209,6 @@ const _handleConversationStart = (msgData) => {
 };
 
 const _handleStrangerMessage = (msgData) => {
-  Typing("true");
-
   const uMsg = msgData.ev_data.msg;
 
   messageList.addItem(colors.obcy("Obcy: ") + colors.message(uMsg));
@@ -333,10 +334,14 @@ const SolveCaptcha = (solved) => {
 };
 
 const Typing = (typing) => {
+  typingState = typing;
+
   _emitSocketEvent("_mtyp", {
     ckey: ckey,
     val: typing,
   });
+
+  clearTimeout(typingTimeout);
 };
 
 const SendTopic = () => {
@@ -441,6 +446,18 @@ input.key("enter", function () {
     this.clearValue();
     screen.render();
   }
+});
+
+input.on("keypress", function (data) {
+  if (typingState === false) {
+    Typing(true);
+  }
+
+  clearTimeout(typingTimeout);
+
+  typingTimeout = setTimeout(() => {
+    Typing(false);
+  }, 1000);
 });
 
 screen.key(["escape", "C-c"], function () {
