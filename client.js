@@ -2,20 +2,13 @@ import "dotenv/config";
 import WebSocket from "ws";
 import fetch from "node-fetch";
 import colors from "colors/safe.js";
-// import fs from "fs";
-// import SocksProxyAgent from "socks-proxy-agent";
-import ora from "ora";
 import blessed from "neo-blessed";
 import open from "open";
 import express from "express";
-// import terminalImage from "./terminalImage";
-
-// var agent = new SocksProxyAgent("socks://91.121.168.6:7497");
 
 let ckey = null;
-let ileMsg = 0;
 let timeoutType = null;
-let ceid = 0;
+let ceid = 1;
 let captchaID = "";
 let captchaBase64 = "";
 let CAPI;
@@ -23,7 +16,6 @@ let CAPI;
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
 
-const spinner = ora();
 const app = express();
 
 colors.setTheme({
@@ -38,10 +30,9 @@ colors.setTheme({
 const ws = new WebSocket(
   "wss://server.6obcy.pl:7001/6eio/?EIO=3&transport=websocket",
   {
-    // agent: agent,
     headers: {
       "User-Agent":
-        "Mozilla Thunderbird " + Math.random().toString(36).substr(2, 9),
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0) Gecko/20100101 Firefox/102.0",
     },
     origin: "https://6obcy.org",
   }
@@ -77,15 +68,9 @@ const _emitSocketEvent = (eventName, eventData) => {
 };
 
 const disConnect = () => {
-  ws.send(
-    `4${JSON.stringify({
-      ev_name: "_distalk",
-      ev_data: {
-        ckey: ckey,
-      },
-      ceid: ceid,
-    })}`
-  );
+  _emitSocketEvent("_distalk", {
+    ckey: ckey,
+  });
 };
 
 const sendMessage = (msg) => {
@@ -93,7 +78,6 @@ const sendMessage = (msg) => {
     ckey: ckey,
     msg,
     idn: 0,
-    ceid: ceid,
   });
 
   messageList.addItem(colors.bot("Ja: ") + colors.message(msg));
@@ -116,7 +100,6 @@ const startConversation = () => {
     },
   });
 
-  // spinner.start("Szukam rozmówcy...");
   box.setContent("");
   messageList.clearItems();
 
@@ -192,22 +175,13 @@ const _handleResponseCaptcha = (msgData) => {
 const _handleConversationStart = (msgData) => {
   clearTimeout(timeoutType);
 
-  ceid = 0;
-  ws.send(
-    `4${JSON.stringify({
-      ev_name: "_begacked",
-      ev_data: {
-        ckey: ckey,
-      },
-      ceid: ceid,
-    })}`
-  );
+  _emitSocketEvent("_begacked", {
+    ckey: ckey,
+  });
 
   ckey = msgData.ev_data.ckey;
-  ileMsg = 0;
-
   captchaBase64 = "";
-  // spinner.succeed(`Połączono z obcym...`);
+
   box.setContent("");
   messageList.clearItems();
 
@@ -223,17 +197,17 @@ const _handleStrangerMessage = (msgData) => {
 
   const uMsg = msgData.ev_data.msg;
 
-  ileMsg = ileMsg + 1;
-
   messageList.addItem(colors.obcy("Obcy: ") + colors.message(uMsg));
   messageList.scrollTo(100);
   screen.render();
 };
 
 const _handleCN = (msg) => {
-  ws.send(
-    `4{"ev_name":"_cinfo","ev_data":{"hash":"${msg.ev_data.hash}","dpa":true,"caper":true}}`
-  );
+  _emitSocketEvent("_cinfo", {
+    hash: msg.ev_data.hash,
+    dpa: true,
+    caper: true,
+  });
 
   startConversation();
 };
@@ -252,35 +226,11 @@ const _handleCaptacha = async (msg) => {
       AskForCaptcha(captchaID);
     }, 20000);
   } else {
+    // TODO
     captchaBase64 = base64;
 
     box.setContent("Wpisz kod z obrazka z strony która się otworzyła");
     await open("http://localhost:3000/captcha");
-
-    // base64 = base64.replace("data:image/jpeg;base64,", "");
-    // const buffer = Buffer.from(base64, "base64");
-
-    // fs.writeFileSync("captcha.jpg", buffer);
-
-    // let captcha = blessed.image({
-    //   parent: box,
-    //   top: 0,
-    //   left: 0,
-    //   type: "overlay",
-    //   width: "center",
-    //   height: "center",
-    //   file: "./captcha.jpg",
-    // });
-
-    // screen.append(captcha);
-
-    // box.setContent(
-    //   await terminalImage.buffer(buffer, {
-    //     width: "200px",
-    //     height: "50px",
-    //     preserveAspectRatio: false,
-    //   })
-    // );
   }
 };
 
@@ -369,17 +319,20 @@ const SolveCaptcha = (solved) => {
 };
 
 const Typing = (typing) => {
-  ws.send(`4{"ev_name":"_mtyp","ev_data":{"ckey":"${ckey}","val":${typing}}}`);
+  _emitSocketEvent("_mtyp", {
+    ckey: ckey,
+    val: typing,
+  });
 };
 
 const SendTopic = () => {
-  ws.send(
-    `4{"ev_name":"_randtopic","ev_data":{"ckey":"${ckey}"},"ceid":${ceid}}`
-  );
+  _emitSocketEvent("_randtopic", {
+    ckey: ckey,
+  });
 };
 
 const NewCaptcha = () => {
-  ws.send(`4{"ev_name":"_capch"}`);
+  _emitSocketEvent("_capch");
 };
 
 //
