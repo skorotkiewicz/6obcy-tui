@@ -1,0 +1,20 @@
+{
+  "name": "6obcy-tui",
+  "version": "1.0.0",
+  "main": "client.js",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node client.js"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^9.0.2",
+    "express": "^4.18.1",
+    "neo-blessed": "^0.2.0",
+    "node-fetch": "^3.2.10",
+    "open": "^8.4.0",
+    "ora": "^6.1.2",
+    "ws": "^8.8.1"
+  }
+}
