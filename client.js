@@ -5,6 +5,7 @@ import colors from "colors/safe.js";
 import blessed from "neo-blessed";
 import open from "open";
 import express from "express";
+import ora from "ora";
 
 let ckey = null;
 let timeoutType = null;
@@ -15,10 +16,15 @@ let reconnect = true;
 let CAPI;
 let typingState = false;
 let typingTimeout = null;
+let isSolved = false;
 
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
 
+const spinner = ora({
+  hideCursor: false,
+  discardStdin: false,
+});
 const app = express();
 
 colors.setTheme({
@@ -191,6 +197,8 @@ const _handleConversationStart = (msgData) => {
   input.show();
   input.focus();
 
+  spinner.stop();
+
   _emitSocketEvent("_begacked", {
     ckey: ckey,
   });
@@ -234,12 +242,8 @@ const _handleCaptacha = async (msg) => {
     SendCaptcha(base64);
 
     setTimeout(() => {
-      messageList.addItem("trying to solve: " + captchaID);
-      messageList.setScrollPerc(100);
-      screen.render();
-
       AskForCaptcha(captchaID);
-    }, 20000);
+    }, 10000);
   } else {
     // TODO
     captchaBase64 = base64;
@@ -254,7 +258,7 @@ const _handleCaptacha = async (msg) => {
 const onConnected = () => {
   input.hide();
 
-  messageList.addItem(`connected`);
+  messageList.addItem(`Połączono z serwerem...`);
   messageList.setScrollPerc(100);
   screen.render();
 };
@@ -264,6 +268,8 @@ const parseJson = (str) => {
 };
 
 const SendCaptcha = async (base64) => {
+  spinner.start("Rozwiązuje captche...");
+
   await fetch("https://2captcha.com/in.php", {
     body:
       "method=base64&key=" +
@@ -275,10 +281,6 @@ const SendCaptcha = async (base64) => {
   }).then((res) => {
     res.text().then((s) => {
       captchaID = s.substring(3);
-
-      messageList.addItem(s, s.substring(3));
-      messageList.setScrollPerc(100);
-      screen.render();
     });
   });
 };
@@ -296,12 +298,10 @@ const AskForCaptcha = (captchaId) => {
 
       if (solved === "CHA_NOT_READY") {
         return setTimeout(() => {
-          messageList.addItem("Captcha jeszcze nie gotowa, próbuje ponownie");
-          messageList.setScrollPerc(100);
-          screen.render();
+          spinner.start("Rozwiązuje captche, jeszcze chwilkę...");
 
           return AskForCaptcha(captchaID);
-        }, 10000); // if not ready wait 10sec and ask again
+        }, 5000); // if not ready wait 10sec and ask again
       }
 
       SolveCaptcha(solved);
@@ -310,16 +310,12 @@ const AskForCaptcha = (captchaId) => {
 };
 
 const ReportCaptcha = (cID, type) => {
-  messageList.addItem(type ? "reportgood" : "reportbad", cID);
-  messageList.setScrollPerc(100);
-  screen.render();
-
   fetch(
     `http://2captcha.com/res.php?key=${CAPI}&action=${
       type ? "reportgood" : "reportbad"
     }&id=${cID}`
   ).then((res) => {
-    res.text().then((s) => {
+    res.text().then(() => {
       if (type === false) NewCaptcha();
     });
   });
@@ -448,7 +444,7 @@ input.key("enter", function () {
   }
 });
 
-input.on("keypress", function (data) {
+input.on("keypress", function () {
   if (typingState === false) {
     Typing(true);
   }
