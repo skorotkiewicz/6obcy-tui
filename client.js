@@ -23,8 +23,6 @@ let CAPI;
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
 
-let AutoWelcomeMessage = "Hej";
-
 const spinner = ora();
 const app = express();
 
@@ -217,7 +215,7 @@ const _handleConversationStart = (msgData) => {
   messageList.scrollTo(100);
   screen.render();
 
-  AutoWelcomeMessage.length > 0 && sendMessage(AutoWelcomeMessage);
+  process.env.WELCOME && sendMessage(process.env.WELCOME);
 };
 
 const _handleStrangerMessage = (msgData) => {
