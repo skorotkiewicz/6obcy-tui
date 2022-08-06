@@ -101,6 +101,8 @@ const startConversation = () => {
     },
   });
 
+  input.hide();
+
   box.setContent("");
   messageList.clearItems();
 
@@ -183,6 +185,8 @@ const _handleResponseCaptcha = (msgData) => {
 
 const _handleConversationStart = (msgData) => {
   clearTimeout(timeoutType);
+  input.show();
+  input.focus();
 
   _emitSocketEvent("_begacked", {
     ckey: ckey,
@@ -217,6 +221,7 @@ const _handleCN = (msg) => {
     dpa: true,
     caper: true,
   });
+  input.hide();
 
   startConversation();
 };
@@ -237,6 +242,8 @@ const _handleCaptacha = async (msg) => {
   } else {
     // TODO
     captchaBase64 = base64;
+    input.show();
+    input.focus();
 
     box.setContent("Wpisz kod z obrazka z strony która się otworzyła");
     await open("http://localhost:3000/captcha");
@@ -244,6 +251,8 @@ const _handleCaptacha = async (msg) => {
 };
 
 const onConnected = () => {
+  input.hide();
+
   messageList.addItem(`connected`);
   messageList.setScrollPerc(100);
   screen.render();
@@ -444,7 +453,7 @@ screen.append(box);
 screen.append(countBox);
 screen.append(input);
 
-input.focus();
+input.hide();
 
 screen.render();
 
