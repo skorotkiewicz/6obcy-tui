@@ -431,7 +431,7 @@ input.key("enter", function () {
       StopConv();
     } else {
       if (captchaBase64.length === 0) {
-        sendMessage(message);
+        if (message.length > 1) sendMessage(message);
       } else {
         SolveCaptcha(message);
       }
