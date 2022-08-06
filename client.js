@@ -44,7 +44,7 @@ ws.on("open", function open() {
 
 ws.on("close", function close() {
   messageList.addItem(colors.end("disconnected"));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 });
 
@@ -81,7 +81,7 @@ const sendMessage = (msg) => {
   });
 
   messageList.addItem(colors.bot("Ja: ") + colors.message(msg));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 
   Typing("false");
@@ -104,7 +104,7 @@ const startConversation = () => {
   messageList.clearItems();
 
   messageList.addItem(colors.warn("Szukam rozmówcy..."));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 };
 
@@ -162,7 +162,7 @@ const _handleCount = (count) => {
 
 const _handleRandomQuestion = (msgData) => {
   messageList.addItem(colors.end(msgData.ev_data.topic));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 };
 
@@ -194,7 +194,7 @@ const _handleConversationStart = (msgData) => {
   messageList.clearItems();
 
   messageList.addItem(colors.warn("Połączono z obcym..."));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 
   process.env.WELCOME && sendMessage(process.env.WELCOME);
@@ -206,7 +206,7 @@ const _handleStrangerMessage = (msgData) => {
   const uMsg = msgData.ev_data.msg;
 
   messageList.addItem(colors.obcy("Obcy: ") + colors.message(uMsg));
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 };
 
@@ -228,7 +228,7 @@ const _handleCaptacha = async (msg) => {
 
     setTimeout(() => {
       messageList.addItem("trying to solve: " + captchaID);
-      messageList.scrollTo(100);
+      messageList.setScrollPerc(100);
       screen.render();
 
       AskForCaptcha(captchaID);
@@ -244,7 +244,7 @@ const _handleCaptacha = async (msg) => {
 
 const onConnected = () => {
   messageList.addItem(`connected`);
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 
   ws.send(
@@ -270,7 +270,7 @@ const SendCaptcha = async (base64) => {
       captchaID = s.substring(3);
 
       messageList.addItem(s, s.substring(3));
-      messageList.scrollTo(100);
+      messageList.setScrollPerc(100);
       screen.render();
     });
   });
@@ -290,7 +290,7 @@ const AskForCaptcha = (captchaId) => {
       if (solved === "CHA_NOT_READY") {
         return setTimeout(() => {
           messageList.addItem("Captcha jeszcze nie gotowa, próbuje ponownie");
-          messageList.scrollTo(100);
+          messageList.setScrollPerc(100);
           screen.render();
 
           return AskForCaptcha(captchaID);
@@ -304,7 +304,7 @@ const AskForCaptcha = (captchaId) => {
 
 const ReportCaptcha = (cID, type) => {
   messageList.addItem(type ? "reportgood" : "reportbad", cID);
-  messageList.scrollTo(100);
+  messageList.setScrollPerc(100);
   screen.render();
 
   fetch(
