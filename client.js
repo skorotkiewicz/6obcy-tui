@@ -11,6 +11,7 @@ let timeoutType = null;
 let ceid = 1;
 let captchaID = "";
 let captchaBase64 = "";
+let reconnect = true;
 let CAPI;
 
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
@@ -122,7 +123,7 @@ const _handleSocketMessage = (data) => {
       break;
 
     case "sdis":
-      startConversation();
+      reconnect && startConversation();
       break;
 
     case "cn_acc":
@@ -339,6 +340,18 @@ const NewCaptcha = () => {
   _emitSocketEvent("_capch");
 };
 
+const StopConv = () => {
+  reconnect = false;
+  disConnect();
+
+  box.setContent("");
+  messageList.clearItems();
+
+  messageList.addItem(colors.warn("Zakonczono, aby wznowić wpisz /start"));
+  messageList.setScrollPerc(100);
+  screen.render();
+};
+
 //
 // TUI
 //
@@ -402,6 +415,11 @@ input.key("enter", function () {
       SendTopic();
     } else if (message === "/dis\n") {
       disConnect();
+    } else if (message === "/start\n") {
+      reconnect = true;
+      startConversation();
+    } else if (message === "/stop\n") {
+      StopConv();
     } else {
       if (captchaBase64.length === 0) {
         sendMessage(message);

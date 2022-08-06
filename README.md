@@ -34,7 +34,9 @@ $ npm run start
 Available commands:
 
 - /dis - disconnects and looks for a new user
-- /topic - sends a random topic to confersation
+- /topic - sends a random topic to conversation
+- /stop - stops the current conversation and does not look for a new conversation
+- /start - searches for a new user and resumes searching for a new conversation when the user disconnects
 
 ## Configuration
 
@@ -45,7 +47,7 @@ $ mv dotenv .env
 $ nano .env
 ```
 
-Auto welcome message can be set in .env, this message will be sent every time the confersation starts.
+Auto welcome message can be set in .env, this message will be sent every time the conversation starts.
 
 ```
 $ nano .env
