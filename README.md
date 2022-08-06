@@ -1,11 +1,10 @@
-# 6obcy-tui
-
-Nice TUI/CLI client for the Polish 6obcy.org "Omegle" website. With auto-solving captcha.
+<h1 align="center">6obcy-tui</h1>
+<p align="center">Nice TUI/CLI client for the Polish 6obcy.org "Omegle" website. With auto-solving captcha.</p>
 
 <p align="center">
     <a href="https://github.com/skorotkiewicz/6obcy-tui">
         <img src="images/intro.png" style="width: 600px;display: block; margin: 0 auto;" />
-        <img src="images/shadow.png" style="margin-top: -10px;width: 600px;display: block; margin: 0 auto;" />
+        <img src="images/shadow.png" style="width: 600px;display: block; margin: 0 auto;" />
     </a>
 </p>
 
