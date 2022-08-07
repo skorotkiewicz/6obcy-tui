@@ -58,4 +58,4 @@ WELCOME = "Hello!"
 ## Todo
 
 - [ ] displaying captcha in the client
-- [x] spinners
+- [ ] spinners

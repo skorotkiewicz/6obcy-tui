@@ -5,7 +5,6 @@ import colors from "colors/safe.js";
 import blessed from "neo-blessed";
 import open from "open";
 import express from "express";
-import ora from "ora";
 
 let ckey = null;
 let timeoutType = null;
@@ -21,10 +20,6 @@ let isSolved = false;
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
 
-const spinner = ora({
-  hideCursor: false,
-  discardStdin: false,
-});
 const app = express();
 
 colors.setTheme({
@@ -52,9 +47,7 @@ ws.on("open", function open() {
 });
 
 ws.on("close", function close() {
-  messageList.addItem(colors.end("disconnected"));
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage("Rozłąnczono z serwerem...");
 });
 
 ws.on("message", function incoming(data) {
@@ -89,9 +82,7 @@ const sendMessage = (msg) => {
     idn: 0,
   });
 
-  messageList.addItem(colors.bot("Ja: ") + colors.message(msg));
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage(colors.bot("Ja: ") + colors.message(msg));
 
   Typing(false);
   screen.render();
@@ -115,9 +106,7 @@ const startConversation = () => {
   box.setContent("");
   messageList.clearItems();
 
-  messageList.addItem(colors.warn("Szukam rozmówcy..."));
-  messageList.setScrollPerc(100);
-  screen.render();
+  isSolved && SendSystemMessage(colors.warn("Szukam rozmówcy..."));
 };
 
 const _handleSocketMessage = (data) => {
@@ -173,9 +162,7 @@ const _handleCount = (count) => {
 };
 
 const _handleRandomQuestion = (msgData) => {
-  messageList.addItem(colors.end(msgData.ev_data.topic));
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage(colors.end(msgData.ev_data.topic));
 };
 
 const _handleStrangerMessageTyp = (typ) => {
@@ -188,16 +175,17 @@ const _handleStrangerMessageTyp = (typ) => {
 };
 
 const _handleResponseCaptcha = (msgData) => {
-  if (captchaBase64.length === 0)
+  isSolved = msgData.ev_data.success;
+
+  if (captchaBase64.length === 0) {
     ReportCaptcha(captchaID, msgData.ev_data.success);
+  }
 };
 
 const _handleConversationStart = (msgData) => {
   clearTimeout(timeoutType);
   input.show();
   input.focus();
-
-  spinner.stop();
 
   _emitSocketEvent("_begacked", {
     ckey: ckey,
@@ -209,9 +197,7 @@ const _handleConversationStart = (msgData) => {
   box.setContent("");
   messageList.clearItems();
 
-  messageList.addItem(colors.warn("Połączono z obcym..."));
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage(colors.warn("Połączono z obcym..."));
 
   process.env.WELCOME && sendMessage(process.env.WELCOME);
 };
@@ -219,9 +205,7 @@ const _handleConversationStart = (msgData) => {
 const _handleStrangerMessage = (msgData) => {
   const uMsg = msgData.ev_data.msg;
 
-  messageList.addItem(colors.obcy("Obcy: ") + colors.message(uMsg));
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage(colors.obcy("Obcy: ") + colors.message(uMsg));
 };
 
 const _handleCN = (msg) => {
@@ -258,9 +242,7 @@ const _handleCaptacha = async (msg) => {
 const onConnected = () => {
   input.hide();
 
-  messageList.addItem(`Połączono z serwerem...`);
-  messageList.setScrollPerc(100);
-  screen.render();
+  SendSystemMessage("Połączono z serwerem...");
 };
 
 const parseJson = (str) => {
@@ -268,7 +250,7 @@ const parseJson = (str) => {
 };
 
 const SendCaptcha = async (base64) => {
-  spinner.start("Rozwiązuje captche...");
+  SendSystemMessage("Rozwiązuje captche...");
 
   await fetch("https://2captcha.com/in.php", {
     body:
@@ -298,7 +280,7 @@ const AskForCaptcha = (captchaId) => {
 
       if (solved === "CHA_NOT_READY") {
         return setTimeout(() => {
-          spinner.start("Rozwiązuje captche, jeszcze chwilkę...");
+          SendSystemMessage("Rozwiązuje captche, jeszcze chwilkę...");
 
           return AskForCaptcha(captchaID);
         }, 5000); // if not ready wait 10sec and ask again
@@ -357,7 +339,11 @@ const StopConv = () => {
   box.setContent("");
   messageList.clearItems();
 
-  messageList.addItem(colors.warn("Zakonczono, aby wznowić wpisz /start"));
+  SendSystemMessage(colors.warn("Zakonczono, aby wznowić wpisz /start"));
+};
+
+const SendSystemMessage = (msg) => {
+  messageList.addItem(msg);
   messageList.setScrollPerc(100);
   screen.render();
 };
