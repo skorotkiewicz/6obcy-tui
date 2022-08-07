@@ -177,9 +177,10 @@ const _handleStrangerMessageTyp = (typ) => {
 const _handleResponseCaptcha = (msgData) => {
   isSolved = msgData.ev_data.success;
 
-  if (captchaBase64.length === 0) {
+  if (captchaBase64.length === 0)
     ReportCaptcha(captchaID, msgData.ev_data.success);
-  }
+
+  if (isSolved === false) NewCaptcha();
 };
 
 const _handleConversationStart = (msgData) => {
@@ -365,6 +366,7 @@ const messageList = blessed.list({
   height: "85%",
   top: "0%",
   left: 0,
+  interactive: false,
   scrollbar: {
     ch: " ",
     inverse: true,
