@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "colors": "^1.4.0",
+    "columnify": "^1.6.0",
     "dotenv": "^9.0.2",
     "express": "^4.18.1",
     "neo-blessed": "^0.2.0",

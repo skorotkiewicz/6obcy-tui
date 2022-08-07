@@ -5,6 +5,7 @@ import colors from "colors/safe.js";
 import blessed from "neo-blessed";
 import open from "open";
 import express from "express";
+import columnify from "columnify";
 
 let ckey = null;
 let timeoutType = null;
@@ -104,7 +105,7 @@ const startConversation = () => {
   input.hide();
 
   box.setContent("");
-  messageList.clearItems();
+  messageList.setContent("");
 
   isSolved && SendSystemMessage(colors.warn("Szukam rozmówcy..."));
 };
@@ -196,7 +197,7 @@ const _handleConversationStart = (msgData) => {
   captchaBase64 = "";
 
   box.setContent("");
-  messageList.clearItems();
+  messageList.setContent("");
 
   SendSystemMessage(colors.warn("Połączono z obcym..."));
 
@@ -338,14 +339,17 @@ const StopConv = () => {
   disConnect();
 
   box.setContent("");
-  messageList.clearItems();
+  messageList.setContent("");
 
   SendSystemMessage(colors.warn("Zakonczono, aby wznowić wpisz /start"));
 };
 
 const SendSystemMessage = (msg) => {
-  messageList.addItem(msg);
+  let formatMsg = columnify([{ msg }], { showHeaders: false });
+
+  messageList.pushLine(formatMsg);
   messageList.setScrollPerc(100);
+
   screen.render();
 };
 
@@ -358,20 +362,19 @@ const screen = blessed.screen({
   title: "6obcy TUI Chat",
 });
 
-const messageList = blessed.list({
-  align: "left",
+const messageList = blessed.box({
   mouse: true,
   keys: true,
   width: "100%",
   height: "85%",
   top: "0%",
   left: 0,
-  interactive: false,
+  alwaysScroll: true,
+  scrollable: true,
   scrollbar: {
     ch: " ",
     inverse: true,
   },
-  items: [],
 });
 
 var box = blessed.box({
