@@ -58,5 +58,5 @@ WELCOME = "Hello!"
 ## Todo
 
 - [x] wrap long message inside list
+- [x] spinners
 - [ ] displaying captcha in the client
-- [ ] spinners

@@ -6,6 +6,7 @@ import blessed from "neo-blessed";
 import open from "open";
 import express from "express";
 import columnify from "columnify";
+import ora from "ora";
 
 let ckey = null;
 let timeoutType = null;
@@ -21,6 +22,10 @@ let isSolved = false;
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
 
+const spinner = ora({
+  hideCursor: false,
+  discardStdin: false,
+});
 const app = express();
 
 colors.setTheme({
@@ -48,7 +53,7 @@ ws.on("open", function open() {
 });
 
 ws.on("close", function close() {
-  SendSystemMessage("Rozłąnczono z serwerem...");
+  SendSystemMessage("Rozłączono z serwerem...");
 });
 
 ws.on("message", function incoming(data) {
@@ -102,12 +107,13 @@ const startConversation = () => {
     },
   });
 
+  spinner.stop();
   input.hide();
 
   box.setContent("");
   messageList.setContent("");
 
-  isSolved && SendSystemMessage(colors.warn("Szukam rozmówcy..."));
+  isSolved && SendSystemMessage(colors.warn("Szukam rozmówcy...     "));
 };
 
 const _handleSocketMessage = (data) => {
@@ -199,7 +205,7 @@ const _handleConversationStart = (msgData) => {
   box.setContent("");
   messageList.setContent("");
 
-  SendSystemMessage(colors.warn("Połączono z obcym..."));
+  SendSystemMessage(colors.warn("Połączono z obcym...       "));
 
   process.env.WELCOME && sendMessage(process.env.WELCOME);
 };
@@ -243,8 +249,7 @@ const _handleCaptacha = async (msg) => {
 
 const onConnected = () => {
   input.hide();
-
-  SendSystemMessage("Połączono z serwerem...");
+  spinner.succeed(`Połączono z serwerem...`);
 };
 
 const parseJson = (str) => {
@@ -252,7 +257,7 @@ const parseJson = (str) => {
 };
 
 const SendCaptcha = async (base64) => {
-  SendSystemMessage("Rozwiązuje captche...");
+  spinner.start("Rozwiązuje captche...");
 
   await fetch("https://2captcha.com/in.php", {
     body:
@@ -282,7 +287,7 @@ const AskForCaptcha = (captchaId) => {
 
       if (solved === "CHA_NOT_READY") {
         return setTimeout(() => {
-          SendSystemMessage("Rozwiązuje captche, jeszcze chwilkę...");
+          spinner.start("Rozwiązuje captche, jeszcze chwilkę...");
 
           return AskForCaptcha(captchaID);
         }, 5000); // if not ready wait 10sec and ask again
@@ -341,7 +346,7 @@ const StopConv = () => {
   box.setContent("");
   messageList.setContent("");
 
-  SendSystemMessage(colors.warn("Zakonczono, aby wznowić wpisz /start"));
+  SendSystemMessage(colors.warn("Zakończono, aby wznowić wpisz /start"));
 };
 
 const SendSystemMessage = (msg) => {
