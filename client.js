@@ -18,6 +18,7 @@ let CAPI;
 let typingState = false;
 let typingTimeout = null;
 let isSolved = false;
+let port = 3000;
 
 if (process.env.CAPTCHA2_API) CAPI = process.env.CAPTCHA2_API;
 else CAPI = false;
@@ -243,7 +244,7 @@ const _handleCaptacha = async (msg) => {
     input.focus();
 
     box.setContent("Wpisz kod z obrazka z strony która się otworzyła");
-    await open("http://localhost:3000/captcha");
+    await open("http://localhost:" + port + "/captcha");
   }
 };
 
@@ -382,7 +383,7 @@ const messageList = blessed.box({
   },
 });
 
-var box = blessed.box({
+const box = blessed.box({
   top: "85%",
   left: 0,
   width: "80%",
@@ -390,7 +391,7 @@ var box = blessed.box({
   content: "",
 });
 
-var countBox = blessed.box({
+const countBox = blessed.box({
   top: "85%",
   right: 0,
   width: "20%",
@@ -470,4 +471,6 @@ app.get("/captcha", function (req, res) {
   res.send(`<img src="${captchaBase64}" />`);
 });
 
-app.listen(3000);
+const server = app.listen(0, () => {
+  port = server.address().port;
+});
